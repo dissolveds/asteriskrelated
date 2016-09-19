@@ -1,0 +1,39 @@
+﻿;------------------------------------------------------------------------------------------------------;
+;                                                                                                      ;
+;"+" sign issue:                                                                                       ;
+;Incoming calls (e.g. PTSN) often comes with "+" sign (before prefix:+994) in front of the CallerID    ;
+;It causes broken links when trying to download or play recorded calls                                 ;
+;                                                                                                      ;
+;In order to solve this issue you can create custom context and apply it to related trunks             ;
+;                                                                                                      ;
+;First statment checks first character of incoming Callerid and if it                                  ;
+;is not equal to "+" it sends this call to default context                                             ;
+;                                                                                                      ;
+;The second statemnt just describes what will be executed next                                         ;
+;                                                                                                      ;
+;The 3rd statemnt actually performs what is described in 2nd statement                                 ;
+;                                                                                                      ;
+;The 4-rd statement is for CDR reports                                                                 ;
+;                                                                                                      ;
+;                                                                                                      ;
+;You should change context for related trunks:                                                         ;
+;                                                                                                      ;
+;You should change it from GUI as it may be overwritten after reboot:                                  ;
+;                                                                                                      ;
+;just add or modify below parametr (should be equal to name of created custom context):                ;
+;                                                                                                      ;
+;context=from-trunk-custom                                                                             ;                                                                                               
+;                                                                                                      ;
+;                                                                                                      ;
+;                                                                                                      ;
+;------------------------------------------------------------------------------------------------------;
+;
+
+
+[from-trunk-custom]
+exten => _.,1,GotoIf($["${CALLERID(num):0:1}" != "+"]?noplusatstart)
+exten => _.,n,NoOp(Changing Caller ID number from ${CALLERID(num)} to ${CALLERID(num):1})
+exten => _.,n,Set(CALLERID(num)=${CALLERID(num):1})
+exten => _.,n,Set(CALLERID(ANI)=${CALLERID(num)})
+exten => _.,n(noplusatstart),Goto(from-trunk,${EXTEN},1)
+
