@@ -1,0 +1,4 @@
+﻿[from-did-direct-ivr-custom] 
+exten => _9XXX,1,ExecIf($["${BLKVM_OVERRIDE}" != ""]?Noop(Deleting: ${BLKVM_OVERRIDE}: ${DB_DELETE(${BLKVM_OVERRIDE})})) 
+exten => _9XXX,n,Set(__NODEST=) 
+exten => _9XXX,n,Goto(from-internal,${EXTEN},1)
