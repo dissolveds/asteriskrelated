@@ -1,0 +1,25 @@
+[ext-did-0001]
+include => ext-did-0001-custom
+exten => fax,1,Goto(${CUT(FAX_DEST,^,1)},${CUT(FAX_DEST,^,2)},${CUT(FAX_DEST,^,3)})
+
+exten => s,1,ExecIf($["${FROM_DID}" = ""]?Set(__FROM_DID=${EXTEN}))
+exten => s,n,Gosub(app-blacklist-check,s,1())
+exten => s,n,Set(CDR(did)=${FROM_DID})
+exten => s,n,ExecIf($[ "${CALLERID(name)}" = "" ] ?Set(CALLERID(name)=${CALLERID(num)}))
+exten => s,n,Set(CHANNEL(musicclass)=default)
+exten => s,n,Set(__MOHCLASS=default)
+;original
+;exten => s,n,Set(__CALLINGPRES_SV=${CALLERPRES()})
+;fix
+exten => s,n,Set(__CALLINGPRES_SV=allowed_passed_screen)
+;original
+;exten => s,n,Set(CALLERPRES()=allowed_not_screened)
+;fix
+exten => s,n,Set(CALLERPRES()=allowed_passed_screen)
+exten => s,n,Set(FAX_DEST=ext-trunk^1^1)
+exten => s,n,Set(FAXOPT(faxdetect)=yes)
+exten => s,n,Answer
+exten => s,n,Wait(4)
+exten => s,n(dest-ext),Goto(ext-trunk,1,1)
+
+;--== end of [ext-did-0001] ==--;
