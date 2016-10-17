@@ -27,3 +27,39 @@ exten => s,n,Wait(4)
 exten => s,n(dest-ext),Goto(ext-trunk,1,1)
 
 ;--== end of [ext-did-0001] ==--;
+
+[ext-trunk]
+include => ext-trunk-custom
+exten => 1,1,Set(TDIAL_STRING=DAHDI/g0)
+exten => 1,n,Set(DIAL_TRUNK=1)
+
+exten => 1,n,Set(CDR(outbound_cnum)=${CALLERID(num)})
+exten => 1,n,Set(CDR(outbound_cnum)=${CALLERID(num)})
+;exten => 1,n,Set(CALLERID(num)=${CALLERID(num)})
+exten => 1,n,Set(CALLERID(num)=${CALLERID(num)})
+;exten => 1,n,Set(CALLERID(ANI)=${CALLERID(num)})
+exten => 1,n,Set(CDR(cnum)=${CALLERID(num)})
+
+exten => 1,n,Goto(ext-trunk,tdial,1)
+
+
+exten => 2,1,Set(TDIAL_STRING=SIP/toLync)
+exten => 2,n,Set(DIAL_TRUNK=2)
+exten => 2,n,Goto(ext-trunk,tdial,1)
+
+exten => tdial,1,Set(OUTBOUND_GROUP=OUT_${DIAL_TRUNK})
+exten => tdial,n,GotoIf($["${OUTMAXCHANS_${DIAL_TRUNK}}" = ""]?nomax)
+exten => tdial,n,GotoIf($[${GROUP_COUNT(OUT_${DIAL_TRUNK})} >= ${OUTMAXCHANS_${DIAL_TRUNK}}]?hangit)
+exten => tdial,n(nomax),ExecIf($["${CALLINGPRES_SV}" != ""]?Set(CALLERPRES()=${CALLINGPRES_SV}))
+exten => tdial,n,Set(DIAL_NUMBER=${FROM_DID})
+exten => tdial,n,GosubIf($["${PREFIX_TRUNK_${DIAL_TRUNK}}" != ""]?sub-flp-${DIAL_TRUNK},s,1())
+exten => tdial,n,Set(OUTNUM=${OUTPREFIX_${DIAL_TRUNK}}${DIAL_NUMBER})
+exten => tdial,n,Set(DIAL_TRUNK_OPTIONS=${IF($["${DB_EXISTS(TRUNK/${DIAL_TRUNK}/dialopts)}" = "1"]?${DB_RESULT}:${TRUNK_OPTIONS})})
+exten => tdial,n,Dial(${TDIAL_STRING}/${OUTNUM},${TRUNK_RING_TIMER},${DIAL_TRUNK_OPTIONS})
+;exten => tdial,n,Set(CALLERID(number)=${CALLERID(number):0:40})
+exten => tdial,n,Set(CALLERID(number)=${CALLERID(number)})
+;exten => tdial,n,Set(CALLERID(name)=${CALLERID(name):0:40})
+exten => tdial,n(hangit),Hangup
+
+;--== end of [ext-trunk] ==--;
+
