@@ -1,3 +1,7 @@
+
+
+
+
 [ext-did-0001]
 include => ext-did-0001-custom
 exten => fax,1,Goto(${CUT(FAX_DEST,^,1)},${CUT(FAX_DEST,^,2)},${CUT(FAX_DEST,^,3)})
